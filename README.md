@@ -3,7 +3,7 @@
 
 
 # netty-pull
-a socket pull-stream implementation based on java nio.
+a socket pull-stream based on java nio.
 
 ## dependency
 ```xml
