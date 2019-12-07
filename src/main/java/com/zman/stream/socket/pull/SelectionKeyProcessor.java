@@ -7,6 +7,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
 
 /**
@@ -101,14 +102,16 @@ public class SelectionKeyProcessor {
 
         int remaining = byteBuffer.remaining();
         if( remaining > 0 ){       // has elements
+
             int writeCount = socketChannel.write(byteBuffer);   // write to socket buffer
             if( writeCount == remaining ){
                 key.interestOps(OP_NOT_WRITE & key.interestOps());  // byteBuffer is empty, won't interest OP_WRITE
-                duplex.read();                                      // read from source
+                duplex.read(duplex.source());                       // read from source
             }
         }else{
+
             key.interestOps(OP_NOT_WRITE & key.interestOps());
-            duplex.read();
+            duplex.read(duplex.source());
         }
     }
 

@@ -47,6 +47,12 @@
             <version>0.0.5</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.zmannotes.stream</groupId>
+            <artifactId>pull-stream</artifactId>
+            <version>1.0.1-SNAPSHOT</version>
+        </dependency>
+
         <!-- test -->
         <!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-classic -->
         <dependency>

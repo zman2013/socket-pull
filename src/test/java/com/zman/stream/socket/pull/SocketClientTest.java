@@ -2,10 +2,13 @@ package com.zman.stream.socket.pull;
 
 import com.zman.net.pull.netty.NettyServer;
 import com.zman.pull.stream.IDuplex;
+import com.zman.pull.stream.IThrough;
 import com.zman.pull.stream.impl.DefaultSink;
 import com.zman.pull.stream.impl.DefaultSource;
+import com.zman.pull.stream.impl.DefaultThrough;
 import com.zman.thread.eventloop.EventLoop;
 import com.zman.thread.eventloop.impl.DefaultEventLoop;
+import io.netty.buffer.ByteBuf;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -66,7 +69,15 @@ public class SocketClientTest {
     public void testReadWrite() throws InterruptedException {
         // start local server
         NettyServer nettyServer = new NettyServer();
-        nettyServer.onAccept(duplex -> pull(duplex, duplex))
+        nettyServer
+                .onAccept(
+                        duplex -> pull(duplex,
+                                new DefaultThrough<ByteBuf, ByteBuf>(byteBuf->{
+                                    byte[] tmp = new byte[byteBuf.readableBytes()];
+                                    byteBuf.duplicate().readBytes(tmp);
+                                    System.out.println("netty:"+new String(tmp, StandardCharsets.UTF_8));
+                                    return byteBuf;                               }),
+                                duplex))
                 .listen(9080);
 
         // declare source and sink
@@ -83,9 +94,10 @@ public class SocketClientTest {
 
         CountDownLatch connectCountDown = new CountDownLatch(1);
         CountDownLatch disconnectCountDown = new CountDownLatch(1);
-        socketClient.onConnected(duplex -> {
-            pull(source, duplex, sink);
-            connectCountDown.countDown();})
+        socketClient
+                .onConnected(duplex -> {
+                    pull(source, duplex, sink);
+                    connectCountDown.countDown(); })
                 .onDisconnected(disconnectCountDown::countDown)
                 .connect("localhost", 9080);
 
@@ -101,7 +113,6 @@ public class SocketClientTest {
         if( !success ){
             throw new RuntimeException("disconnect failed");
         }
-
 
         eventLoop.shutdown();
         nettyServer.close();
