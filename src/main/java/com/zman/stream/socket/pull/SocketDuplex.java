@@ -8,13 +8,14 @@ import com.zman.pull.stream.bean.ReadResultEnum;
 import com.zman.pull.stream.impl.DefaultDuplex;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
-import java.nio.charset.StandardCharsets;
 
-public class SocketDuplex extends DefaultDuplex<byte[]> {
+
+public class SocketDuplex extends DefaultDuplex<EasyBuffer> {
 
     private Selector selector;
 
@@ -25,11 +26,11 @@ public class SocketDuplex extends DefaultDuplex<byte[]> {
         this.selector = selector;
         this.socketChannel = socketChannel;
 
-        callback = new IDuplexCallback<byte[]>() {
+        callback = new IDuplexCallback<EasyBuffer>() {
             public void onClosed() {
                 closeSocket();
             }
-            public void onNext(byte[] data) {
+            public void onNext(EasyBuffer data) {
                 onData(data);
             }
             public void onError(Throwable throwable) {
@@ -49,8 +50,8 @@ public class SocketDuplex extends DefaultDuplex<byte[]> {
      * read data from socket read buffer
      * @param data data
      */
-    private void onData(byte[] data){
-        sinkBuffer.put(data);
+    private void onData(EasyBuffer data){
+        sinkBuffer = data;
         try {
             interestOps(socketChannel, selector, SelectionKey.OP_WRITE);
         } catch (ClosedChannelException e) {
@@ -60,8 +61,8 @@ public class SocketDuplex extends DefaultDuplex<byte[]> {
 
 
     @Override
-    public ReadResult<byte[]> get(boolean end, ISink<byte[]> sink) {
-        ReadResult<byte[]> readResult = super.get(end, sink);
+    public ReadResult<EasyBuffer> get(boolean end, ISink<EasyBuffer> sink) {
+        ReadResult<EasyBuffer> readResult = super.get(end, sink);
 
         // source doesn't have more data, interest OP_READ
         if( ReadResultEnum.Waiting.equals(readResult.status) ){
@@ -82,10 +83,10 @@ public class SocketDuplex extends DefaultDuplex<byte[]> {
      * @param source source stream
      */
     @Override
-    public void read(ISource<byte[]> source) {
+    public void read(ISource<EasyBuffer> source) {
         this.source = source;
 
-        ReadResult<byte[]> readResult = source.get(closed, this);
+        ReadResult<EasyBuffer> readResult = source.get(closed, this);
 
         switch (readResult.status){
             case Available:
@@ -115,12 +116,12 @@ public class SocketDuplex extends DefaultDuplex<byte[]> {
     }
 
 
-    private EasyBuffer sinkBuffer = new EasyBuffer();
+    private EasyBuffer sinkBuffer;
     public EasyBuffer getSinkBuffer() { return sinkBuffer; }
 
     private EasyBuffer sourceBuffer = new EasyBuffer();
     public EasyBuffer getSourceBuffer() { return sourceBuffer; }
 
-    public ISource<byte[]> source(){return source;}
+    public ISource<EasyBuffer> source(){return source;}
 
 }

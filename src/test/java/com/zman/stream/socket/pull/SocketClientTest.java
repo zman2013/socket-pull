@@ -2,7 +2,6 @@ package com.zman.stream.socket.pull;
 
 import com.zman.net.pull.netty.NettyServer;
 import com.zman.pull.stream.IDuplex;
-import com.zman.pull.stream.IThrough;
 import com.zman.pull.stream.impl.DefaultSink;
 import com.zman.pull.stream.impl.DefaultSource;
 import com.zman.pull.stream.impl.DefaultThrough;
@@ -25,13 +24,6 @@ import static com.zman.pull.stream.util.Pull.pull;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SocketClientTest {
-
-    @Mock
-    private Consumer<IDuplex> connectCallback;
-    @Mock
-    private Runnable disconnectCallback;
-    @Mock
-    private Consumer<Throwable> throwableCallback;
 
     @Test
     public void testConnectAndDisconnect() throws InterruptedException {
@@ -81,12 +73,20 @@ public class SocketClientTest {
                 .listen(9080);
 
         // declare source and sink
-        DefaultSource<byte[]> source = new DefaultSource<>();
+        DefaultSource<EasyBuffer> source = new DefaultSource<>();
         for(int i = 0; i < 10; i ++){
-            source.push(String.valueOf(i).getBytes(StandardCharsets.UTF_8));
+            EasyBuffer easyBuffer = new EasyBuffer();
+            ByteBuffer buffer = easyBuffer.getWritableByteBuffer();
+            buffer.put(String.valueOf(i).getBytes(StandardCharsets.UTF_8));
+            source.push(easyBuffer);
         }
         StringBuilder sb = new StringBuilder();
-        DefaultSink<byte[]> sink = new DefaultSink<>(buf -> sb.append(new String(buf, StandardCharsets.UTF_8)));
+        DefaultSink<EasyBuffer> sink = new DefaultSink<>(easyBuffer -> {
+            ByteBuffer buffer = easyBuffer.getReadableByteBuffer();
+            byte[] bytes = new byte[buffer.remaining()];
+            buffer.get(bytes);
+            sb.append(new String(bytes, StandardCharsets.UTF_8));
+        });
 
         // start socket client
         EventLoop eventLoop = new DefaultEventLoop();

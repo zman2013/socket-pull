@@ -2,6 +2,7 @@ package com.zman.stream.socket.pull;
 
 import com.zman.pull.stream.IDuplex;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
@@ -71,10 +72,12 @@ public class SelectionKeyProcessor {
         EasyBuffer easyBuffer = duplex.getSourceBuffer();
         ByteBuffer byteBuffer = easyBuffer.getWritableByteBuffer();
 
-        socketChannel.read(byteBuffer);         // read from socket buffer
+        int num = socketChannel.read(byteBuffer);         // read from socket buffer
+        if( num == -1 ){        // EOFException()
+            duplex.close();
+        }
 
-        byte[] bytes = easyBuffer.toArray();
-        if( !duplex.push(bytes) ){  // push to duplex
+        if( !duplex.push(easyBuffer) ){  // push to duplex
             throw new RuntimeException("invoking duplex.push failed, this is unreachable");
         }
     }
