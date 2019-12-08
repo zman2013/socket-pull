@@ -74,10 +74,10 @@ public class SelectionKeyProcessor {
 
         int num = socketChannel.read(byteBuffer);         // read from socket buffer
         if( num == -1 ){        // EOFException()
-            duplex.close();
+            duplex.source().close();
         }
 
-        if( !duplex.push(easyBuffer) ){  // push to duplex
+        if( !duplex.source().push(easyBuffer) ){  // push to duplex
             throw new RuntimeException("invoking duplex.push failed, this is unreachable");
         }
     }
@@ -109,12 +109,12 @@ public class SelectionKeyProcessor {
             int writeCount = socketChannel.write(byteBuffer);   // write to socket buffer
             if( writeCount == remaining ){
                 key.interestOps(OP_NOT_WRITE & key.interestOps());  // byteBuffer is empty, won't interest OP_WRITE
-                duplex.read(duplex.source());                       // read from source
+                duplex.sink().read(duplex.sink().source());         // continue reading from source
             }
         }else{
 
             key.interestOps(OP_NOT_WRITE & key.interestOps());
-            duplex.read(duplex.source());
+            duplex.sink().read(duplex.sink().source());
         }
     }
 

@@ -1,6 +1,7 @@
 package com.zman.stream.socket.pull;
 
 import com.zman.net.pull.AbstractClient;
+import com.zman.pull.stream.IDuplex;
 import com.zman.thread.eventloop.EventLoop;
 import com.zman.thread.eventloop.impl.TaskType;
 
@@ -12,7 +13,7 @@ import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.concurrent.Callable;
 
-public class SocketClient extends AbstractClient {
+public class SocketClient extends AbstractClient<IDuplex> {
 
     private EventLoop eventLoop;
 

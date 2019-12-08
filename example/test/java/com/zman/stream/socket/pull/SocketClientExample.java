@@ -22,7 +22,8 @@ public class SocketClientExample {
 
         DefaultSource<byte[]> source = new DefaultSource<>();
         DefaultSink<byte[]> sink = new DefaultSink<>(buf ->
-               System.out.println("sink: " + new String(buf, StandardCharsets.UTF_8)));
+               System.out.println("sink: " + new String(buf, StandardCharsets.UTF_8)),
+                Throwable::printStackTrace);
 
         new SocketClient(eventLoop)
                 .onConnected(duplex->pull(source, duplex, sink))

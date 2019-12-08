@@ -22,7 +22,7 @@ public class SocketEncoderTest {
         ISource<byte[]> source = new DefaultSource<>();
 
         Holder<EasyBuffer> resultHolder = new Holder<>();
-        ISink<EasyBuffer> sink = new DefaultSink<>(data->resultHolder.value=data,()->{}, t->{});
+        ISink<EasyBuffer> sink = new DefaultSink<>(data->{resultHolder.value=data;return false;},()->{}, t->{});
 
         pull(source, new SocketEncoder(), sink);
 

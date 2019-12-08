@@ -28,12 +28,12 @@ public class SocketDecoder extends DefaultThrough<EasyBuffer, byte[]> {
     private BlockingQueue<byte[]> updateBuffer = new LinkedBlockingQueue<>();
 
 
-    public ReadResult<byte[]> get(boolean end, ISink sink) {
+    public ReadResult<byte[]> get(boolean end, Throwable throwable, ISink sink) {
         if(updateBuffer.size()>0){
             return new ReadResult<>(updateBuffer.poll());
         }
 
-        ReadResult readResult = source.get(end, sink);
+        ReadResult readResult = source.get(end, throwable, sink);
         if(ReadResultEnum.Available.equals(readResult.status)){
             EasyBuffer buffer = (EasyBuffer) readResult.data;
 

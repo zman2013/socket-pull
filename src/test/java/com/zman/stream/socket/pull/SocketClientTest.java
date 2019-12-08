@@ -2,6 +2,7 @@ package com.zman.stream.socket.pull;
 
 import com.zman.net.pull.netty.NettyServer;
 import com.zman.pull.stream.IDuplex;
+import com.zman.pull.stream.ISink;
 import com.zman.pull.stream.impl.DefaultSink;
 import com.zman.pull.stream.impl.DefaultSource;
 import com.zman.pull.stream.impl.DefaultThrough;
@@ -11,14 +12,12 @@ import io.netty.buffer.ByteBuf;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
 import static com.zman.pull.stream.util.Pull.pull;
 
@@ -29,7 +28,7 @@ public class SocketClientTest {
     public void testConnectAndDisconnect() throws InterruptedException {
         // start local server
         NettyServer nettyServer = new NettyServer();
-        nettyServer.onAccept(duplex -> pull(duplex, duplex))
+        nettyServer.onAccept((channelId,duplex) -> pull(duplex, duplex))
                 .listen(8080);
 
         // start socket client
@@ -63,7 +62,7 @@ public class SocketClientTest {
         NettyServer nettyServer = new NettyServer();
         nettyServer
                 .onAccept(
-                        duplex -> pull(duplex,
+                        (channleId,duplex)-> pull(duplex,
                                 new DefaultThrough<ByteBuf, ByteBuf>(byteBuf->{
                                     byte[] tmp = new byte[byteBuf.readableBytes()];
                                     byteBuf.duplicate().readBytes(tmp);
@@ -81,11 +80,13 @@ public class SocketClientTest {
             source.push(easyBuffer);
         }
         StringBuilder sb = new StringBuilder();
-        DefaultSink<EasyBuffer> sink = new DefaultSink<>(easyBuffer -> {
+        ISink<EasyBuffer> sink = new DefaultSink<>();
+        sink.onNext(easyBuffer -> {
             ByteBuffer buffer = easyBuffer.getReadableByteBuffer();
             byte[] bytes = new byte[buffer.remaining()];
             buffer.get(bytes);
             sb.append(new String(bytes, StandardCharsets.UTF_8));
+            return false;
         });
 
         // start socket client

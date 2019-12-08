@@ -19,9 +19,9 @@ public class SocketEncoder extends DefaultThrough<byte[], EasyBuffer> {
     private EasyBuffer easyBuffer = new EasyBuffer();
 
     @Override
-    public ReadResult get(boolean end, ISink sink) {
+    public ReadResult get(boolean end, Throwable throwable, ISink sink) {
 
-        ReadResult readResult = source.get(end, sink);
+        ReadResult readResult = source.get(end, throwable, sink);
         if(ReadResultEnum.Available.equals(readResult.status)){
 
             byte[] bytes = (byte[]) readResult.data;

@@ -5,6 +5,7 @@ import com.zman.pull.stream.ISource;
 import com.zman.pull.stream.impl.DefaultSink;
 import com.zman.pull.stream.impl.DefaultSource;
 import com.zman.stream.socket.pull.EasyBuffer;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -12,16 +13,21 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.nio.ByteBuffer;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static com.zman.pull.stream.util.Pull.pull;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SocketDecoderTest {
 
     @Mock
-    private Consumer<byte[]> onData;
+    private Function<byte[],Boolean> onData;
+
+    @Before
+    public void before(){
+        when(onData.apply(any())).thenReturn(false);
+    }
 
     @Test
     public void decode(){
@@ -47,7 +53,7 @@ public class SocketDecoderTest {
         buf.putInt(Integer.MAX_VALUE).flip();
         buf.get(expected);
 
-        verify(onData, times(1)).accept(expected);
+        verify(onData, times(1)).apply(expected);
 
     }
 
@@ -77,7 +83,7 @@ public class SocketDecoderTest {
         buf.putInt(Integer.MAX_VALUE).flip();
         buf.get(expected);
 
-        verify(onData, times(1)).accept(expected);
+        verify(onData, times(1)).apply(expected);
 
     }
 
