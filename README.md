@@ -10,7 +10,7 @@ a socket pull-stream based on java nio.
 <dependency>
     <groupId>com.zmannotes</groupId>
     <artifactId>socket-pull</artifactId>
-    <version>0.0.1</version>
+    <version>2.1.2</version>
 </dependency>
 ```
 
