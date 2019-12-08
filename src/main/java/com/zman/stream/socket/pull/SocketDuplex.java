@@ -33,7 +33,7 @@ public class SocketDuplex extends DefaultDuplex<EasyBuffer> {
 
     }
 
-    private void close(Throwable throwable) {
+    public void close(Throwable throwable) {
         try {
             socketChannel.close();
             source().close(throwable);
