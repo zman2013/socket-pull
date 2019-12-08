@@ -12,7 +12,7 @@
     <logger name="com.zman.stream.socket.pull.SocketDuplex" level="info"/>
     <!--<logger name="'io.netty" level="info"/>-->
 
-    <root level="debug">
+    <root level="info">
         <appender-ref ref="STDOUT" />
     </root>
 </configuration>

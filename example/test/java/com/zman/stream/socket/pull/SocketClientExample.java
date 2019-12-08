@@ -21,14 +21,14 @@ public class SocketClientExample {
         EventLoop eventLoop = new DefaultEventLoop();
 
         DefaultSource<byte[]> source = new DefaultSource<>();
-        DefaultSink<byte[]> sink = new DefaultSink<>(buf ->
-               System.out.println("sink: " + new String(buf, StandardCharsets.UTF_8)),
+        DefaultSink<byte[]> sink = new DefaultSink<>(buf ->{
+               System.out.println("sink: " + new String(buf, StandardCharsets.UTF_8));
+               return false;},
                 Throwable::printStackTrace);
 
         new SocketClient(eventLoop)
                 .onConnected(duplex->pull(source, duplex, sink))
                 .onDisconnected(()-> log.info("disconnected"))
-                .onThrowable(Throwable::printStackTrace)
                 .connect("localhost", 8081);
 
         for( int i = 0; i < 10; i ++ ) {

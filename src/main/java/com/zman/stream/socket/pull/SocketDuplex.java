@@ -20,16 +20,17 @@ public class SocketDuplex extends DefaultDuplex<EasyBuffer> {
         this.selector = selector;
         this.socketChannel = socketChannel;
 
-        sink().onClosed(throwable -> close(null))
-                .onNext(this::onData)
-                .onWait(()->{
-                    try {
-                        interestOps(socketChannel, selector, SelectionKey.OP_READ);
-                    } catch (ClosedChannelException e) {
-                        close(e);
-                    }
-                });
+        sink().onClosed(this::close)
+                .onNext(this::onData);
 
+        // buffer is empty, read from socket read buffer
+        source().onBufferEmpty(() -> {
+            try {
+                interestOps(socketChannel, selector, SelectionKey.OP_READ);
+            } catch (ClosedChannelException e) {
+                close(e);
+            }
+        });
 
     }
 

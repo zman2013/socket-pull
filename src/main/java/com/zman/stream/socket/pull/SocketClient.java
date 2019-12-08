@@ -13,7 +13,7 @@ import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.concurrent.Callable;
 
-public class SocketClient extends AbstractClient<IDuplex> {
+public class SocketClient extends AbstractClient {
 
     private EventLoop eventLoop;
 
