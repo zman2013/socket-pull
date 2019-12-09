@@ -1,7 +1,6 @@
 package com.zman.stream.socket.pull;
 
 import com.zman.net.pull.AbstractClient;
-import com.zman.pull.stream.IDuplex;
 import com.zman.thread.eventloop.EventLoop;
 import com.zman.thread.eventloop.impl.TaskType;
 
